@@ -239,6 +239,7 @@ export default function PatientProfileModal({ patient, onClose }: Props) {
                       publicUrls={publicUrls}
                       loading={loading}
                       onLightbox={setLightbox}
+                      onDelete={setDeleteFile}
                     />
                   )}
                 </motion.div>
@@ -495,11 +496,13 @@ function MediaTab({
   publicUrls,
   loading,
   onLightbox,
+  onDelete,
 }: {
   files: PatientFile[];
   publicUrls: Record<string, string>;
   loading: boolean;
   onLightbox: (url: string) => void;
+  onDelete: (f: PatientFile) => void;
 }) {
   if (loading) return <LoadingState rows={3} />;
   if (files.length === 0) return (
@@ -533,7 +536,7 @@ function MediaTab({
                   </div>
                 )}
                 <button
-                  onClick={(e) => { e.stopPropagation(); setDeleteFile(f); }}
+                  onClick={(e) => { e.stopPropagation(); onDelete(f); }}
                   title="Delete file"
                   className="absolute top-2 right-2 z-10 p-1.5 bg-white/80 text-gray-600 hover:text-red-600 hover:bg-white rounded-lg transition-opacity opacity-0 group-hover:opacity-100"
                 >
@@ -560,7 +563,7 @@ function MediaTab({
                   <span className="text-xs text-gray-400">{format(new Date(f.created_at), 'MMM d, yyyy')}</span>
                 </div>
                 <button
-                  onClick={() => setDeleteFile(f)}
+                  onClick={() => onDelete(f)}
                   title="Delete file"
                   className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 >

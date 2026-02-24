@@ -8,7 +8,7 @@
   2. Creates a new super admin with the proper identity record
 
   ## Super Admin Credentials
-  - Email: admin@Dr Ali Dental Centre.com
+  - Email: admin@dadc.com
   - Password: Admin123!
   - Role: admin (full system access)
 */
@@ -43,7 +43,7 @@ BEGIN
   ) VALUES (
     new_user_id,
     '00000000-0000-0000-0000-000000000000',
-    'admin@Dr Ali Dental Centre.com',
+    'admin@dadc.com',
     crypt('Admin123!', gen_salt('bf')),
     now(),
     '{"provider": "email", "providers": ["email"]}',
@@ -71,10 +71,10 @@ BEGIN
   ) VALUES (
     gen_random_uuid(),
     new_user_id,
-    'admin@Dr Ali Dental Centre.com',
+    'admin@dadc.com',
     jsonb_build_object(
       'sub', new_user_id::text,
-      'email', 'admin@Dr Ali Dental Centre.com',
+      'email', 'admin@dadc.com',
       'email_verified', true,
       'phone_verified', false
     ),

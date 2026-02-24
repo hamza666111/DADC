@@ -32,7 +32,9 @@ export default function StaffLoginPage() {
     setLoading(false);
 
     if (error) {
-      toast.error('Invalid email or password. Please try again.');
+      // show server-provided message when available to aid diagnosis
+      const msg = error.message || 'Invalid email or password. Please try again.';
+      toast.error(msg);
     } else {
       toast.success('Welcome back!');
       // ❌ DO NOT navigate here

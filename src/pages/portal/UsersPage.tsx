@@ -44,24 +44,43 @@ const emptyCreate: CreateFormData = { name: '', email: '', password: '', role: '
 const emptyEdit: EditFormData = { name: '', role: 'doctor', clinic_id: '', is_active: true };
 
 async function callEdgeFunction(action: string, payload: Record<string, unknown>, accessToken: string) {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  try {
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`;
+    const body = JSON.stringify({ action, ...payload });
+    console.debug('Invoking function create-user', { url, body });
 
-  const res = await fetch(`${supabaseUrl}/functions/v1/create-user`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`,
-      'apikey': anonKey,
-    },
-    body: JSON.stringify({ action, ...payload }),
-  });
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        apikey: anonKey,
+      },
+      body,
+    });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'Request failed');
+    const status = res.status;
+    const textBody = await res.text();
+    let data: any = null;
+    try {
+      data = JSON.parse(textBody);
+    } catch (_) {
+      // ignore non-JSON response
+    }
+
+    if (!res.ok) {
+      console.error('Edge function responded with error', { status, data, textBody });
+      const errMsg = data?.error || data?.message || textBody || `HTTP ${status}`;
+      throw new Error(errMsg);
+    }
+
+    console.debug('Edge function response', { status, data, textBody });
+    return data;
+  } catch (err) {
+    console.error('callEdgeFunction exception:', err);
+    throw err;
   }
-  return data;
 }
 
 export default function UsersPage() {
@@ -151,7 +170,7 @@ export default function UsersPage() {
       .from('clinics')
       .select('id, clinic_name')
       .order('clinic_name')
-      .then(({ data }) => setClinics(data || []));
+      .then(({ data }) => setClinics((data as unknown as Clinic[]) || []));
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
